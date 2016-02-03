@@ -9,7 +9,7 @@ import sass
 from subprocess import PIPE, Popen
 
 p = Popen([sass.path, "--help"], stdout=PIPE, stderr=PIPE)
-print(p.communicate()[0]) # possible race condition, but eh...
+print(p.communicate()[0])
 ```
 
 ## Building
