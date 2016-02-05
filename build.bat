@@ -10,7 +10,7 @@ set msbuild="%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild"
 
 if "%1"=="-m32" (
 	set cfg="/p:Platform=Win32"
-) else if "%1"="-m64" (
+) else if "%1"=="-m64" (
 	set cfg="/p:Platform=Win64"
 )
 
