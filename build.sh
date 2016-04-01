@@ -8,11 +8,19 @@ if [ "$1" == "-m32" ]; then export CFLAGS='-m32'; else unset CFLAGS; fi
 if [ "$1" == "-m32" ]; then export CXXFLAGS='-m32'; else unset CXXFLAGS; fi
 if [ "$1" == "-m32" ]; then export LDFLAGS='-m32'; else unset LDFLAGS; fi
 
-git submodule --quiet deinit .
+if [ -n "$2" ]; then
+	vsn=$2
+else
+	vsn=`git log --date-order --tags --simplify-by-decoration --pretty=format:"%d" \
+		| perl -ne 'print if s/.+?tag: v?([0-9.]+)[,\)].*$/\1/' | head -n 1`
+fi
+
+git submodule --quiet deinit -f .
 git submodule --quiet init
-git pull --quiet --recurse-submodule
 git submodule --quiet update
-git submodule foreach "git checkout tags/\`git log --date-order --tags --simplify-by-decoration --pretty=format:"%d" | perl -ne 'print if s/.+?tag: v?([0-9.]+)[,\)].*$/\1/' | head -n 1\`"
+git submodule --quiet foreach "git checkout --quiet tags/$vsn"
+
+echo Building v$vsn $1
 
 (
 	BUILD="shared" make -C libsass -j5 >/dev/null && echo "libsass build succeeded" &&
