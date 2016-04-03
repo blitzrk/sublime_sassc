@@ -1,35 +1,31 @@
 @ECHO OFF
-set LIBSASS="3.3.3"
-set SASSC="3.3.2"
+set VSN=%1
 
-:: set git="%ProgramFiles(x86)%\Git\bin\git" :: for older git-bash installs
-set git="%ProgramFiles%\Git\bin\git"
-
-:: s/14/12/ for VS2013 (min req) instead of VS2015 
-set msbuild="%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild"
+:: Try to guarantee git and msbuild are in path
+IF EXIST "%ProgramFiles(x86)%\Git\bin\git" SET PATH=%PATH%;"%ProgramFiles(x86)%\Git\bin"
+IF EXIST "%ProgramFiles%\Git\bin\git" SET PATH=%PATH%;"%ProgramFiles%\Git\bin"
+IF EXIST "%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild" SET PATH=%PATH%;"%ProgramFiles(x86)%\MSBuild\14.0\Bin"
+IF EXIST "%ProgramFiles(x86)%\MSBuild\12.0\Bin\MSBuild" SET PATH=%PATH%;"%ProgramFiles(x86)%\MSBuild\12.0\Bin"
 
 set cfg=/m /p:Configuration=Release
-if "%1"=="-m32" (
+if "%2"=="-m32" (
 	set cfg=%cfg% /p:Platform=Win32
-) else if "%1"=="-m64" (
+) else if "%2"=="-m64" (
 	set cfg=%cfg% /p:Platform=Win64
 )
 set cfg=%cfg% /p:ForceImportBeforeCppTargets=%~dp0%static.props
 
-%git% submodule -q deinit -f .
-%git% submodule -q init
-%git% pull -q --recurse-submodule
-%git% submodule update
-
-cmd /c "cd libsass && %git% checkout tags/%LIBSASS%" >nul
-cmd /c "cd sassc.git && %git% checkout tags/%SASSC%" >nul
+git submodule -q deinit -f .
+git submodule -q init
+git submodule -q update
+git submodule -q foreach "git checkout -q tags/%VSN%"
 
 xcopy sassc.git\* libsass\sassc /s /i >nul
 cmd /c (
-	cd libsass\sassc
-	%msbuild% win\sassc.sln %cfg% /t:Clean;Build
-	copy bin\sassc.exe ..\..\sassc.exe
-	cd ..\..
+	pushd libsass\sassc
+	msbuild win\sassc.sln %cfg% /t:Clean;Build
+	popd
+	copy libsass\sassc\bin\sassc.exe sassc.exe
 )
 
 echo "Built sassc.exe. Copy to appropriate directories."

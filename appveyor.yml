@@ -1,0 +1,36 @@
+version: 1.0.{build}
+
+branches:
+  only:
+    - build
+
+skip_tags: true
+
+skip_commits:
+  author: /(Travis CI)|(Appveyor)/
+  message: /^(?!Upgraded Windows)/
+
+os: Visual Studio 2015
+
+clone_folder: c:\projects\sublime_sassc
+
+environment:
+  gh_token:
+    secure: MvdJfQB+M4J/YSrgz423k/4Q6U+OQTA7D5KGzWayeEctNlAeRGh8ybIlvol0QU8D
+
+install:
+  - cd c:\projects\sublime_sassc
+  - ps: cmd.exe /c "build.bat $env:APPVEYOR_REPO_COMMIT_MESSAGE.split(' v')[1] -m32"
+  - copy sassc st2_windows_x32\
+  - copy sassc st3_windows_x32\
+  - del sassc
+  - ps: cmd.exe /c "build.bat $env:APPVEYOR_REPO_COMMIT_MESSAGE.split(' v')[1] -m64"
+  - copy sassc st2_windows_x64\
+  - copy sassc st3_windows_x64\
+  - del sassc
+
+on_success:
+  - git config --global user.name Appveyor
+  - git config --global user.email build@appveyor.com
+  - ps: git commit -m "Updated Windows to v$($env:VSN)"
+  - ps: git push "https://$($env:gh_token)@github.com/blitzrk/sublime_sassc" master
