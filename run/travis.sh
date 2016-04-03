@@ -3,24 +3,24 @@ set -e
 
 msg=`git log -1 --pretty=%B | xargs echo` # trimmed commit msg
 
-if [[ "$msg" != Upgrade\ Linux\ to\ v* ]] && [[ "$msg" != Upgrade\ OSX\ to\ v* ]] ; then
+if [[ "$msg" != Upgrade\ linux\ to\ v* ]] && [[ "$msg" != Upgrade\ osx\ to\ v* ]] ; then
 	exit 0
 fi
 
-if [[ "$msg" == *\ Linux\ * ]]; then
+if [[ "$msg" == *\ linux\ * ]]; then
 	if [[ "$TRAVIS_OS_NAME" != "linux" ]]; then
 		exit 0
 	fi
 
-	vsn="${msg#Upgrade Linux to v*}"
+	vsn="${msg#Upgrade linux to v*}"
 	sudo apt-get install gcc-multilib
 	sudo apt-get install g++-multilib
-elif [[ "$msg" == *\ OSX\ * ]]; then
+elif [[ "$msg" == *\ osx\ * ]]; then
 	if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
 		exit 0
 	fi
 
-	vsn="${msg#Upgrade OSX to v*}"
+	vsn="${msg#Upgrade osx to v*}"
 	brew update >/dev/null
 	brew install gcc || brew outdated gcc || brew upgrade gcc
 fi

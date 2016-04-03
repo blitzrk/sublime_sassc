@@ -20,7 +20,7 @@ git submodule -q init
 git submodule -q update
 git submodule -q foreach "git checkout -q tags/%VSN%"
 
-xcopy sassc.git\* libsass\sassc /s /i >nul
+move sassc.git libsass\sassc
 cmd /c (
 	pushd libsass\sassc
 	msbuild win\sassc.sln %cfg% /t:Clean;Build
