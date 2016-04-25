@@ -7,8 +7,7 @@ branches:
 skip_tags: true
 
 skip_commits:
-  author: /(Travis CI)|(Appveyor)/
-  message: /^Upgraded? (linux)|(osx)/
+  message: /^(?!Upgrade windows)/
 
 os: Visual Studio 2015
 
@@ -19,22 +18,22 @@ environment:
     secure: MvdJfQB+M4J/YSrgz423k/4Q6U+OQTA7D5KGzWayeEctNlAeRGh8ybIlvol0QU8D
 
 install:
-  - git checkout master
-  - ps: if(! "$env:APPVEYOR_REPO_COMMIT_MESSAGE".startsWith("Upgrade windows to v")) { Exit }
   - ps: cmd.exe /c "build.bat $($env:APPVEYOR_REPO_COMMIT_MESSAGE.split('v')[1]) -m32"
-  - copy sassc.exe st2_windows_x32\
-  - copy sassc.exe st3_windows_x32\
-  - del sassc.exe
+  - ren sassc.exe sassc32.exe
   - ps: cmd.exe /c "build.bat $($env:APPVEYOR_REPO_COMMIT_MESSAGE.split('v')[1]) -m64"
+  - git checkout master
+  - copy sassc32.exe st2_windows_x32\sassc.exe
+  - move sassc32.exe st3_windows_x32\sassc.exe
   - copy sassc.exe st2_windows_x64\
-  - copy sassc.exe st3_windows_x64\
-  - del sassc.exe
+  - move sassc.exe st3_windows_x64\
 
 build: off
 
 on_success:
-  - git config --global user.name Appveyor
-  - git config --global user.email build@appveyor.com
-  - git add st*
+  - git config --global user.name "Ben Krieger"
+  - git config --global user.email blitzrk@gmail.com
+  - git add st2*
+  - git add st3*
   - ps: git commit -m "Updated Windows to v$($env:APPVEYOR_REPO_COMMIT_MESSAGE.split('v')[1])"
   - ps: git push "https://$($env:gh_token)@github.com/blitzrk/sublime_sassc.git" master
+  - ps: if(($error[0] | out-string) -like '*rejected*') { Exit 1 }
