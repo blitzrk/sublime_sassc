@@ -1,5 +1,5 @@
 install: true,
-script: bash ./run/travis.sh
+script: bash ./travis.sh
 sudo: required
 branches:
   only:
